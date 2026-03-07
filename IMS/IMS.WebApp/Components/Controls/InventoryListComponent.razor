@@ -15,19 +15,12 @@
         {
             foreach (var inventory in inventories)
             {
-                <tr>
-                    <td>@inventory.Name</td>
-                    <td>@inventory.Quantity</td>
-                    <td>@inventory.Price.ToString("C")</td>
-                    <td>
-                        <button type="button" class="btn-outline-primary">Edit</button>
-                    </td>
-                </tr>
+                <InventoryListItemComponent Inventory="inventory"></InventoryListItemComponent>
             }
         }
         else
         {
-            <p>No inventory matched your search.</p>
+            <p>No inventory item matched your search.</p>
         }
     </tbody>
 </table>
