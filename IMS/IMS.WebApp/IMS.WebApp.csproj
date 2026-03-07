@@ -5,4 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IMS.Plugins\IMS.Plugins.InMemory\IMS.Plugins.InMemory.csproj" />
+    <ProjectReference Include="..\IMS.UseCases\IMS.UseCases.csproj" />
+  </ItemGroup>
 </Project>
