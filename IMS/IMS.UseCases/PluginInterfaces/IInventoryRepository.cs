@@ -8,5 +8,7 @@ namespace IMS.UseCases.PluginInterfaces
             string? name,
             CancellationToken cancellationToken
         );
+
+        Task AddInventoryAsync(Inventory inventory, CancellationToken cancellationToken = default);
     }
 }
