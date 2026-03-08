@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | **Last updated** | 2026-03-07 |
-| **Based on commit** | `fa2429d0eff9b27d629c67289045e759528907d0` |
+| **Based on commit** | `d96b7db4297a4ed06fa982ef99065ee8cefc1c4e` |
 | **Commit date** | 2026-03-07 |
 
 ## Overview
@@ -59,18 +59,21 @@ These interfaces form the *ports* in the Ports & Adapters sense, keeping the app
 | Interface | Purpose |
 | --- | --- |
 | `IViewInventoriesByNameUseCase` | Retrieve inventories, optionally filtered by name |
+| `IAddInventoryUseCase` | Add a new inventory item |
 
 #### Plugin interfaces / Repository ports (`PluginInterfaces/`)
 
-| Interface | Purpose |
-| --- | --- |
-| `IInventoryRepository` | Persistence port — fetches inventories by name |
+| Interface | Method | Purpose |
+| --- | --- | --- |
+| `IInventoryRepository` | `GetInventoriesByNameAsync` | Persistence port — fetches inventories filtered by name |
+| `IInventoryRepository` | `AddInventoryAsync` | Persistence port — persists a new inventory item |
 
 #### Use-case implementations (`Inventories/`)
 
 | Class | Implements | Description |
 | --- | --- | --- |
 | `ViewInventoriesByNameUseCase` | `IViewInventoriesByNameUseCase` | Delegates to `IInventoryRepository`; returns a filtered collection of `Inventory` entities |
+| `AddInventoryUseCase` | `IAddInventoryUseCase` | Assigns a `Guid.CreateVersion7`-based `Id` then delegates to `IInventoryRepository.AddInventoryAsync` |
 
 **Project dependencies:** `IMS.CoreBusiness`.
 
@@ -82,7 +85,7 @@ Provides concrete *adapters* for the repository ports defined in `IMS.UseCases`.
 
 | Class | Implements | Description |
 | --- | --- | --- |
-| `InventoryRepository` | `IInventoryRepository` | Hard-coded seed data (bike parts); filters by name using `OrdinalIgnoreCase` comparison |
+| `InventoryRepository` | `IInventoryRepository` | Seed data (four bike parts) stored in a `HashSet<Inventory>`; supports name-filter retrieval and add (duplicate guard via `HashSet`) |
 
 Swapping this project for a different plugin (e.g., `IMS.Plugins.EFCore`) requires only a DI re-wiring in `Program.cs` — no changes to the domain or use-case layers.
 
@@ -99,8 +102,9 @@ ASP.NET Core Blazor application that renders the UI and wires the dependency inj
 | Page | Route | Description |
 | --- | --- | --- |
 | `Home.razor` | `/` | Quick view: renders a plain list of all inventory items |
-| `InventoryList.razor` | `/inventories` | Full inventory table via `InventoryListComponent` |
-| `NotFound.razor` | — | 404 handler |
+| `Inventories/InventoryList.razor` | `/inventories` | Full inventory table via `InventoryListComponent`; links to Add Inventory |
+| `Inventories/AddInventory.razor` | `/addInventory` | Data-annotated `EditForm` for creating a new inventory item; redirects to `/inventories` on success |
+| `NotFound.razor` | `/not-found` | 404 handler (wired via `UseStatusCodePagesWithReExecute`) |
 | `Error.razor` | `/Error` | Unhandled-exception fallback |
 
 #### Reusable controls (`Components/Controls/`)
@@ -125,8 +129,9 @@ DI registrations that complete the dependency inversion:
 // Plugin adapter bound to the repository port
 builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
 
-// Use-case bound to its interface
+// Use-cases bound to their interfaces
 builder.Services.AddTransient<IViewInventoriesByNameUseCase, ViewInventoriesByNameUseCase>();
+builder.Services.AddTransient<IAddInventoryUseCase, AddInventoryUseCase>();
 ```
 
 **Project dependencies:** `IMS.UseCases`, `IMS.Plugins.InMemory`.
@@ -148,22 +153,38 @@ The **Dependency Rule** is upheld throughout: source-code dependencies point exc
 
 ---
 
-## Data Flow (View Inventories)
+## Data Flows
+
+### View Inventories
 
 ```text
 Browser request
-  → InventoryList.razor (page)
+  → Inventories/InventoryList.razor (page)
     → InventoryListComponent.razor (control)
-      → IViewInventoriesByNameUseCase.ExecuteAsync()   [use-case interface]
-        → ViewInventoriesByNameUseCase                 [use-case impl]
-          → IInventoryRepository.GetInventoriesByNameAsync()  [plugin interface]
-            → InventoryRepository (InMemory)           [plugin adapter]
-              → List<Inventory>                        [domain entity]
+      → IViewInventoriesByNameUseCase.ExecuteAsync()        [use-case interface]
+        → ViewInventoriesByNameUseCase                      [use-case impl]
+          → IInventoryRepository.GetInventoriesByNameAsync() [plugin interface]
+            → InventoryRepository (InMemory)                [plugin adapter]
+              → HashSet<Inventory>                          [domain entity]
           ← IReadOnlyCollection<Inventory>
         ← IEnumerable<Inventory>
       ← List<Inventory>
     → InventoryListItemComponent × N (one per row)
   → Rendered HTML table
+```
+
+### Add Inventory
+
+```text
+User submits AddInventory form
+  → Inventories/AddInventory.razor (page — EditForm / OnValidSubmit)
+    → IAddInventoryUseCase.ExecuteAsync(inventory)          [use-case interface]
+      → AddInventoryUseCase                                 [use-case impl]
+        assigns Id = "INV-{Guid.CreateVersion7()}"
+        → IInventoryRepository.AddInventoryAsync(inventory) [plugin interface]
+          → InventoryRepository (InMemory)                  [plugin adapter]
+            → HashSet<Inventory>.Add()                      [domain entity]
+  → NavigationManager.NavigateTo("/inventories")
 ```
 
 ---
@@ -175,7 +196,7 @@ Browser request
 | Runtime | .NET 10 |
 | Web framework | ASP.NET Core Blazor Server (static SSR with `MapRazorComponents`) |
 | UI styling | Bootstrap 5 |
-| Persistence (current) | In-memory (`List<Inventory>` seed data) |
+| Persistence (current) | In-memory (`HashSet<Inventory>` seed data) |
 | Persistence (future) | Swappable via new `IMS.Plugins.*` project |
 
 ---
