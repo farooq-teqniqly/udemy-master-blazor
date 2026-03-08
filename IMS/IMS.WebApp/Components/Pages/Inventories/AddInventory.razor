@@ -1,5 +1,6 @@
 ﻿@page "/add-inventory"
 
+
 @inject IAddInventoryUseCase AddInventoryUseCase
 @inject NavigationManager NavigationManager
 
@@ -7,7 +8,7 @@
 <br/>
 
 <EditForm Model="inventory" FormName="formInventory" OnValidSubmit="SaveAsync">
-    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <FluentValidator></FluentValidator>
 
     <div class="form-group">
         <label for="name">Name</label>
