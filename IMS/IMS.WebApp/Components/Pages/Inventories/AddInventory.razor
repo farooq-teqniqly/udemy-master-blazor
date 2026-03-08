@@ -31,8 +31,13 @@
 </EditForm>
 
 @code {
+
     [SupplyParameterFromForm]
-    private Inventory inventory { get; set; } = new();
+    private Inventory inventory
+    {
+        get;
+        set => field = value ?? new();
+    } = new();
 
     private async Task SaveAsync()
     {
