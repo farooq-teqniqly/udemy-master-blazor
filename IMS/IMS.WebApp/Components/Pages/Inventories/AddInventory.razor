@@ -32,17 +32,18 @@
 </EditForm>
 
 @code {
+    private Inventory _inventory = new();
 
     [SupplyParameterFromForm]
     private Inventory inventory
     {
-        get;
-        set => field = value ?? new();
-    } = new();
+        get => _inventory;
+        set => _inventory = value;
+    }
 
     private async Task SaveAsync()
     {
-        await AddInventoryUseCase.ExecuteAsync(inventory);
+        await AddInventoryUseCase.ExecuteAsync(_inventory);
         NavigationManager.NavigateTo("/inventories");
     }
 
