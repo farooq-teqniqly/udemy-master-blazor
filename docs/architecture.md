@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | **Last updated** | 2026-03-07 |
-| **Based on commit** | `d96b7db4297a4ed06fa982ef99065ee8cefc1c4e` |
+| **Based on commit** | `d193823737c60dc0d42cf67bee24aa31db72ace3` |
 | **Commit date** | 2026-03-07 |
 
 ## Overview
@@ -41,7 +41,7 @@ The innermost ring. Contains enterprise-wide business rules and entity definitio
 
 | Item | Description |
 | --- | --- |
-| `Inventory` | Core domain entity representing a stocked item (Id, Name, Price, Quantity) |
+| `Inventory` | Core domain entity representing a stocked item (`Id`, `Name`, `Price`, `Quantity`). Implements `IEquatable<Inventory>` with equality by `Id` (case-insensitive); also overrides `==` / `!=` operators and `GetHashCode`. No data-annotation attributes — validation is handled by FluentValidation in the use-cases layer. |
 
 **Project dependencies:** none.
 
@@ -77,7 +77,24 @@ These interfaces form the *ports* in the Ports & Adapters sense, keeping the app
 | `ViewInventoriesByNameUseCase` | `IViewInventoriesByNameUseCase` | Delegates to `IInventoryRepository`; returns a filtered collection of `Inventory` entities |
 | `AddInventoryUseCase` | `IAddInventoryUseCase` | Assigns a `Guid.CreateVersion7`-based `Id` then delegates to `IInventoryRepository.AddInventoryAsync` |
 
-**Project dependencies:** `IMS.CoreBusiness`.
+#### Validators (`Validators/`)
+
+| Class | Validates | Rules |
+| --- | --- | --- |
+| `InventoryValidator` | `Inventory` | `Name`: 5–100 chars, not empty; `Price`: 0–1,000,000; `Quantity`: 0–100,000 |
+
+Uses **FluentValidation** (`AbstractValidator<T>`).
+
+#### Composition helpers (`Extensions/`)
+
+`ServiceCollectionExtensions` exposes two extension methods on `IServiceCollection` that are called from `Program.cs`:
+
+| Method | Registers |
+| --- | --- |
+| `AddUseCases()` | `IViewInventoriesByNameUseCase` → `ViewInventoriesByNameUseCase` (transient); `IAddInventoryUseCase` → `AddInventoryUseCase` (transient) |
+| `AddValidators()` | `IValidator<Inventory>` → `InventoryValidator` (singleton) |
+
+**Project dependencies:** `IMS.CoreBusiness`. NuGet: `FluentValidation`, `Microsoft.Extensions.DependencyInjection.Abstractions`.
 
 ---
 
@@ -105,7 +122,8 @@ ASP.NET Core Blazor application that renders the UI and wires the dependency inj
 | --- | --- | --- |
 | `Home.razor` | `/` | Quick view: renders a plain list of all inventory items |
 | `Inventories/InventoryList.razor` | `/inventories` | Full inventory table via `InventoryListComponent`; links to Add Inventory |
-| `Inventories/AddInventory.razor` | `/addInventory` | Data-annotated `EditForm` for creating a new inventory item; redirects to `/inventories` on success. Cancel is an `<a href>` link (not `@onclick`) because the page runs under static SSR. |
+| `Inventories/AddInventory.razor` | `/add-inventory` | `EditForm` validated by `<FluentValidator>` (Blazilla); redirects to `/inventories` on success. Cancel is an `<a href>` link (not `@onclick`) because the page runs under static SSR. |
+| `Weather.razor` | `/weather` | Demo page using `@attribute [StreamRendering]`; simulates async data load and renders a 5-day weather forecast table |
 | `NotFound.razor` | `/not-found` | 404 handler (wired via `UseStatusCodePagesWithReExecute`) |
 | `Error.razor` | `/Error` | Unhandled-exception fallback |
 
@@ -131,12 +149,12 @@ DI registrations that complete the dependency inversion:
 // Plugin adapter bound to the repository port
 builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
 
-// Use-cases bound to their interfaces
-builder.Services.AddTransient<IViewInventoriesByNameUseCase, ViewInventoriesByNameUseCase>();
-builder.Services.AddTransient<IAddInventoryUseCase, AddInventoryUseCase>();
+// Use-cases and validators via extension methods defined in IMS.UseCases
+builder.Services.AddUseCases();
+builder.Services.AddValidators();
 ```
 
-**Project dependencies:** `IMS.UseCases`, `IMS.Plugins.InMemory`.
+**Project dependencies:** `IMS.UseCases`, `IMS.Plugins.InMemory`. NuGet: `Blazilla` (provides `<FluentValidator>` Blazor component), `FluentValidation.DependencyInjectionExtensions`.
 
 ---
 
@@ -178,11 +196,12 @@ Browser request
 ### Add Inventory
 
 ```text
-User submits AddInventory form
+User submits AddInventory form (HTTP POST)
   → Inventories/AddInventory.razor (page — EditForm / OnValidSubmit)
+    FluentValidator runs server-side before OnValidSubmit fires
     → IAddInventoryUseCase.ExecuteAsync(inventory)          [use-case interface]
       → AddInventoryUseCase                                 [use-case impl]
-        assigns Id = "INV-{Guid.CreateVersion7()}"
+        assigns Id = $"INV-{Guid.CreateVersion7()}"
         → IInventoryRepository.AddInventoryAsync(inventory) [plugin interface]
           → InventoryRepository (InMemory)                  [plugin adapter]
             → HashSet<Inventory>.Add()                      [domain entity]
@@ -196,8 +215,9 @@ User submits AddInventory form
 | Concern | Technology |
 | --- | --- |
 | Runtime | .NET 10 |
-| Web framework | ASP.NET Core Blazor Server (static SSR with `MapRazorComponents`) |
+| Web framework | ASP.NET Core Blazor (static SSR with `MapRazorComponents`) |
 | UI styling | Bootstrap 5 |
+| Form validation | FluentValidation + Blazilla (`<FluentValidator>` component) |
 | Persistence (current) | In-memory (`HashSet<Inventory>` seed data) |
 | Persistence (future) | Swappable via new `IMS.Plugins.*` project |
 
