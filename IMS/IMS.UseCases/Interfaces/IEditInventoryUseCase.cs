@@ -2,7 +2,7 @@
 
 namespace IMS.UseCases.Interfaces;
 
-public interface IAddInventoryUseCase
+public interface IEditInventoryUseCase
 {
     Task ExecuteAsync(Inventory inventory, CancellationToken cancellationToken = default);
 }

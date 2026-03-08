@@ -67,5 +67,47 @@ namespace IMS.Plugins.InMemory
                 inventories.ToList().AsReadOnly()
             );
         }
+
+        public Task<Inventory> GetInventoryByIdAsync(string id, CancellationToken cancellationToken)
+        {
+            return !_inventories.TryGetValue(
+                new Inventory
+                {
+                    Id = id,
+                    Name = string.Empty,
+                    Price = 0,
+                    Quantity = 0,
+                },
+                out var inventory
+            )
+                ? throw new Exception($"Inventory with id {id} does not exist.")
+                : Task.FromResult(inventory);
+        }
+
+        public Task UpdateInventoryAsync(Inventory inventory, CancellationToken cancellationToken)
+        {
+            if (!_inventories.Contains(inventory))
+            {
+                throw new InvalidOperationException(
+                    $"Inventory with id {inventory.Id} does not exist."
+                );
+            }
+
+            if (
+                _inventories.Any(i =>
+                    i.Name.Equals(inventory.Name, StringComparison.OrdinalIgnoreCase)
+                )
+            )
+            {
+                throw new InvalidOperationException(
+                    $"Inventory with name {inventory.Name} already exists."
+                );
+            }
+
+            _inventories.Remove(inventory);
+            _inventories.Add(inventory);
+
+            return Task.CompletedTask;
+        }
     }
 }
