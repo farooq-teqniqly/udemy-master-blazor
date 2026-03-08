@@ -8,7 +8,9 @@
 
 ## Overview
 
-The Inventory Management System (IMS) is a nascent Blazor Server application built on **.NET 10** following **Clean Architecture** (also known as the Ports & Adapters or Onion Architecture pattern). The solution is structured so that the innermost layers have zero knowledge of outer layers, and all dependencies point inward toward the domain.
+The Inventory Management System (IMS) is a nascent Blazor application built on **.NET 10** following **Clean Architecture** (also known as the Ports & Adapters or Onion Architecture pattern). The solution is structured so that the innermost layers have zero knowledge of outer layers, and all dependencies point inward toward the domain.
+
+The application runs in **static Server-Side Rendering (SSR)** mode — pages are rendered to plain HTML on the server and streamed to the browser with no persistent SignalR circuit or WebAssembly runtime. This has concrete implications for UI design: `@onclick` and other interactive Blazor event handlers are inert by default, so navigation (e.g., a Cancel button) must use plain `<a href>` links or server-triggered redirects via `NavigationManager.NavigateTo` inside form POST handlers.
 
 ---
 
@@ -93,7 +95,7 @@ Swapping this project for a different plugin (e.g., `IMS.Plugins.EFCore`) requir
 
 ---
 
-### 4. `IMS.WebApp` — Presentation Layer (Blazor Server)
+### 4. `IMS.WebApp` — Presentation Layer (Blazor, static SSR)
 
 ASP.NET Core Blazor application that renders the UI and wires the dependency injection container. Components interact exclusively with use-case interfaces — never with repositories directly.
 
@@ -103,7 +105,7 @@ ASP.NET Core Blazor application that renders the UI and wires the dependency inj
 | --- | --- | --- |
 | `Home.razor` | `/` | Quick view: renders a plain list of all inventory items |
 | `Inventories/InventoryList.razor` | `/inventories` | Full inventory table via `InventoryListComponent`; links to Add Inventory |
-| `Inventories/AddInventory.razor` | `/addInventory` | Data-annotated `EditForm` for creating a new inventory item; redirects to `/inventories` on success |
+| `Inventories/AddInventory.razor` | `/addInventory` | Data-annotated `EditForm` for creating a new inventory item; redirects to `/inventories` on success. Cancel is an `<a href>` link (not `@onclick`) because the page runs under static SSR. |
 | `NotFound.razor` | `/not-found` | 404 handler (wired via `UseStatusCodePagesWithReExecute`) |
 | `Error.razor` | `/Error` | Unhandled-exception fallback |
 
