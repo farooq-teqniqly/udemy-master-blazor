@@ -14,7 +14,11 @@ public sealed class ViewInventoryByIdUseCase : IViewInventoryByIdUseCase
 
         _inventoryRepository = inventoryRepository;
     }
-    public async Task<Inventory> ExecuteAsync(string id, CancellationToken cancellationToken = default)
+
+    public async Task<Inventory?> ExecuteAsync(
+        string id,
+        CancellationToken cancellationToken = default
+    )
     {
         return await _inventoryRepository.GetInventoryByIdAsync(id, cancellationToken);
     }

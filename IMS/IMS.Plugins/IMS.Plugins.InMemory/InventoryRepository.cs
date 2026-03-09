@@ -68,20 +68,28 @@ namespace IMS.Plugins.InMemory
             );
         }
 
-        public Task<Inventory> GetInventoryByIdAsync(string id, CancellationToken cancellationToken)
+        public Task<Inventory?> GetInventoryByIdAsync(
+            string id,
+            CancellationToken cancellationToken
+        )
         {
-            return !_inventories.TryGetValue(
-                new Inventory
-                {
-                    Id = id,
-                    Name = string.Empty,
-                    Price = 0,
-                    Quantity = 0,
-                },
-                out var inventory
+            if (
+                !_inventories.TryGetValue(
+                    new Inventory
+                    {
+                        Id = id,
+                        Name = string.Empty,
+                        Price = 0,
+                        Quantity = 0,
+                    },
+                    out var inventory
+                )
             )
-                ? throw new Exception($"Inventory with id {id} does not exist.")
-                : Task.FromResult(inventory);
+            {
+                return Task.FromResult(null as Inventory);
+            }
+
+            return Task.FromResult(inventory)!;
         }
 
         public Task UpdateInventoryAsync(Inventory inventory, CancellationToken cancellationToken)
@@ -96,6 +104,7 @@ namespace IMS.Plugins.InMemory
             if (
                 _inventories.Any(i =>
                     i.Name.Equals(inventory.Name, StringComparison.OrdinalIgnoreCase)
+                    && i.Id != inventory.Id
                 )
             )
             {

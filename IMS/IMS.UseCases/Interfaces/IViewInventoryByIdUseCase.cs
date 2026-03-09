@@ -4,5 +4,5 @@ namespace IMS.UseCases.Interfaces;
 
 public interface IViewInventoryByIdUseCase
 {
-    Task<Inventory> ExecuteAsync(string id, CancellationToken cancellationToken = default);
+    Task<Inventory?> ExecuteAsync(string id, CancellationToken cancellationToken = default);
 }

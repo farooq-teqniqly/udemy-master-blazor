@@ -9,7 +9,7 @@ namespace IMS.UseCases.PluginInterfaces
             string? name,
             CancellationToken cancellationToken
         );
-        Task<Inventory> GetInventoryByIdAsync(string id, CancellationToken cancellationToken);
+        Task<Inventory?> GetInventoryByIdAsync(string id, CancellationToken cancellationToken);
         Task UpdateInventoryAsync(Inventory inventory, CancellationToken cancellationToken);
     }
 }
