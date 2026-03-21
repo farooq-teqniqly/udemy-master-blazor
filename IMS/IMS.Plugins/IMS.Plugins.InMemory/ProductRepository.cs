@@ -23,6 +23,30 @@ namespace IMS.Plugins.InMemory
             },
         ];
 
+        public Task DeleteProductAsync(string id, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(id);
+
+            if (
+                !_products.TryGetValue(
+                    new Product
+                    {
+                        Id = id,
+                        Name = string.Empty,
+                        Price = 0,
+                        Quantity = 0,
+                    },
+                    out var inventory
+                )
+            )
+            {
+                throw new InvalidOperationException($"Product with id {id} does not exist.");
+            }
+
+            _products.Remove(inventory);
+            return Task.CompletedTask;
+        }
+
         public Task<IReadOnlyCollection<Product>> GetProductsByNameAsync(
             string? name,
             CancellationToken cancellationToken

@@ -15,13 +15,13 @@
         {
             foreach (var product in products)
             {
-                <ProductListItemComponent Product="product"></ProductListItemComponent>
+                <ProductListItemComponent @rendermode="InteractiveServer" Product="product"></ProductListItemComponent>
             }
         }
         else
         {
             <tr>
-                <td colspan="4">No products matched your search.</td>
+                <td colspan="4">No products, add one!</td>
             </tr>
         }
     </tbody>

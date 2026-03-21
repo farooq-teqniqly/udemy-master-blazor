@@ -1,4 +1,6 @@
-﻿@if (Product is not null)
+﻿@inject IDeleteProductUseCase DeleteProductUseCase
+
+@if (Product is not null)
 {
     <tr>
         <td>@Product.Name</td>
@@ -6,6 +8,9 @@
         <td>@Product.Price.ToString("C")</td>
         <td>
             <a href="/edit-product/@Product.Id" class="btn btn-outline-primary">Edit</a>
+        </td>
+        <td>
+            <button type="button" class="btn btn-outline-danger" @onclick="async () => await Delete()">Delete</button>
         </td>
     </tr>
 }
@@ -15,4 +20,12 @@
     [Parameter]
     public Product? Product { get; set; }
 
+    private async Task Delete()
+    {
+        if (Product is not null)
+        {
+            await DeleteProductUseCase.ExecuteAsync(Product.Id);
+            Product = null;
+        }
+    }
 }
