@@ -1,0 +1,68 @@
+﻿@page "/edit-product/{id}"
+
+@inject NavigationManager NavigationManager
+@inject IViewProductByIdUseCase ViewProductByIdUseCase
+@inject IEditProductUseCase EditProductUseCase
+
+<h3>Edit Product</h3>
+<br/>
+
+@if (product is not null)
+{
+    <EditForm Model="product" FormName="formProduct" OnValidSubmit="UpdateAsync">
+        <FluentValidator></FluentValidator>
+
+        <InputText @bind-Value="product.Id" hidden></InputText>
+
+        <div class="form-group">
+            <label for="name">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="product.Name"></InputText>
+            <ValidationMessage For="() => product.Name"></ValidationMessage>
+        </div>
+        <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <InputNumber id="quantity" class="form-control" @bind-Value="product.Quantity"></InputNumber>
+            <ValidationMessage For="() => product.Quantity"></ValidationMessage>
+        </div>
+        <div class="form-group">
+            <label for="price">Price</label>
+            <InputNumber id="price" class="form-control" @bind-Value="product.Price"></InputNumber>
+            <ValidationMessage For="() => product.Price"></ValidationMessage>
+        </div>
+        <br/>
+        <button type="submit" class="btn btn-outline-primary">Update</button>
+        &nbsp;
+        <a href="/products" class="btn btn-outline-danger">Cancel</a>
+    </EditForm>
+}
+
+@code {
+
+    [SupplyParameterFromForm]
+    private Product? product { get; set; }
+
+    [Parameter] 
+    public required string Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        product ??= await ViewProductByIdUseCase.ExecuteAsync(Id);
+
+        if (product is null)
+        {
+            NavigationManager.NotFound();
+        }
+    }
+
+    private async Task UpdateAsync()
+    {
+        if (product is null)
+        {
+            return;
+        }
+
+        await EditProductUseCase.ExecuteAsync(product);
+        NavigationManager.NavigateTo("/products");
+    }
+
+}

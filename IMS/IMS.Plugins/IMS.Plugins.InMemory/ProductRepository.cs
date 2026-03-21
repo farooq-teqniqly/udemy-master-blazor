@@ -47,6 +47,27 @@ namespace IMS.Plugins.InMemory
             return Task.CompletedTask;
         }
 
+        public Task<Product?> GetProductByIdAsync(string id, CancellationToken cancellationToken)
+        {
+            if (
+                !_products.TryGetValue(
+                    new Product
+                    {
+                        Id = id,
+                        Name = string.Empty,
+                        Price = 0,
+                        Quantity = 0,
+                    },
+                    out var product
+                )
+            )
+            {
+                return Task.FromResult(null as Product);
+            }
+
+            return Task.FromResult(product)!;
+        }
+
         public Task<IReadOnlyCollection<Product>> GetProductsByNameAsync(
             string? name,
             CancellationToken cancellationToken
@@ -62,6 +83,33 @@ namespace IMS.Plugins.InMemory
             );
 
             return Task.FromResult<IReadOnlyCollection<Product>>(products.ToList().AsReadOnly());
+        }
+
+        public Task UpdateProductAsync(Product product, CancellationToken cancellationToken)
+        {
+            if (!_products.Contains(product))
+            {
+                throw new InvalidOperationException(
+                    $"Product with id {product.Id} does not exist."
+                );
+            }
+
+            if (
+                _products.Any(i =>
+                    i.Name.Equals(product.Name, StringComparison.OrdinalIgnoreCase)
+                    && i.Id != product.Id
+                )
+            )
+            {
+                throw new InvalidOperationException(
+                    $"Product with name {product.Name} already exists."
+                );
+            }
+
+            _products.Remove(product);
+            _products.Add(product);
+
+            return Task.CompletedTask;
         }
     }
 }
