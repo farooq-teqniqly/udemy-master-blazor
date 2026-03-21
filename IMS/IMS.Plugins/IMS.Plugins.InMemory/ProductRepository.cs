@@ -16,7 +16,7 @@ namespace IMS.Plugins.InMemory
             },
             new()
             {
-                Id = $"PRD-019ccaff-493e-7ea6-b242-adbd6ff7984e",
+                Id = "PRD-019ccaff-493e-7ea6-b242-adbd6ff7984e",
                 Name = "Ultra-light Road Bike",
                 Quantity = 1,
                 Price = 11000,
