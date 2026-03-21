@@ -5,6 +5,7 @@ namespace IMS.UseCases.PluginInterfaces
     public interface IInventoryRepository
     {
         Task AddInventoryAsync(Inventory inventory, CancellationToken cancellationToken = default);
+        Task DeleteInventoryAsync(string id, CancellationToken cancellationToken);
         Task<IReadOnlyCollection<Inventory>> GetInventoriesByNameAsync(
             string? name,
             CancellationToken cancellationToken

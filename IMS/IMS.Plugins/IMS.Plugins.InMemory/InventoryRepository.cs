@@ -49,6 +49,30 @@ namespace IMS.Plugins.InMemory
                 : Task.CompletedTask;
         }
 
+        public Task DeleteInventoryAsync(string id, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(id);
+
+            if (
+                !_inventories.TryGetValue(
+                    new Inventory
+                    {
+                        Id = id,
+                        Name = string.Empty,
+                        Price = 0,
+                        Quantity = 0,
+                    },
+                    out var inventory
+                )
+            )
+            {
+                throw new InvalidOperationException($"Inventory with id {id} does not exist.");
+            }
+
+            _inventories.Remove(inventory);
+            return Task.CompletedTask;
+        }
+
         public Task<IReadOnlyCollection<Inventory>> GetInventoriesByNameAsync(
             string? name,
             CancellationToken cancellationToken
