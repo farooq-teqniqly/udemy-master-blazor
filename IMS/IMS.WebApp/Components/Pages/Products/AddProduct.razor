@@ -1,5 +1,6 @@
 ﻿@page "/add-product"
 
+@rendermode InteractiveServer
 
 @inject IAddProductUseCase AddProductUseCase
 @inject NavigationManager NavigationManager
@@ -7,7 +8,7 @@
 <h3>AddProduct</h3>
 <br/>
 
-<EditForm Model="product" FormName="formProduct" OnValidSubmit="SaveAsync">
+<EditForm Model="product" OnValidSubmit="SaveAsync">
     <FluentValidator></FluentValidator>
 
     <div class="form-group">
@@ -32,18 +33,11 @@
 </EditForm>
 
 @code {
-    private Product _product = new();
-
-    [SupplyParameterFromForm]
-    private Product product
-    {
-        get => _product;
-        set => _product = value;
-    }
+    private Product product { get; init; } = new();
 
     private async Task SaveAsync()
     {
-        await AddProductUseCase.ExecuteAsync(_product);
+        await AddProductUseCase.ExecuteAsync(product);
         NavigationManager.NavigateTo("/products");
     }
 
