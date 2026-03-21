@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents();
 
 builder.Services.AddSingleton<IInventoryRepository, InventoryRepository>();
+builder.Services.AddSingleton<IProductRepository, ProductRepository>();
+
 builder.Services.AddUseCases();
 builder.Services.AddValidators();
 

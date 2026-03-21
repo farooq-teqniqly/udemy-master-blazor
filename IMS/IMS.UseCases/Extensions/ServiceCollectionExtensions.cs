@@ -2,6 +2,7 @@
 using IMS.CoreBusiness;
 using IMS.UseCases.Interfaces;
 using IMS.UseCases.Inventories;
+using IMS.UseCases.Products;
 using IMS.UseCases.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,6 +25,7 @@ namespace IMS.UseCases.Extensions
                 services.AddTransient<IEditInventoryUseCase, EditInventoryUseCase>();
                 services.AddTransient<IViewInventoryByIdUseCase, ViewInventoryByIdUseCase>();
                 services.AddTransient<IDeleteInventoryUseCase, DeleteInventoryUseCase>();
+                services.AddTransient<IViewProductsByNameUseCase, ViewProductsByNameUseCase>();
 
                 return services;
             }
@@ -33,6 +35,8 @@ namespace IMS.UseCases.Extensions
                 ArgumentNullException.ThrowIfNull(services);
 
                 services.AddSingleton<IValidator<Inventory>, InventoryValidator>();
+                services.AddSingleton<IValidator<Product>, ProductValidator>();
+
                 return services;
             }
         }
