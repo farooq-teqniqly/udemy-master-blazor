@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace IMS.CoreBusiness
+﻿namespace IMS.CoreBusiness
 {
     public sealed class Inventory : IEquatable<Inventory>
     {
