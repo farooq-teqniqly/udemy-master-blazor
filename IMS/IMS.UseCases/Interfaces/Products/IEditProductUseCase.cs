@@ -1,6 +1,6 @@
 ﻿using IMS.CoreBusiness;
 
-namespace IMS.UseCases.Interfaces;
+namespace IMS.UseCases.Interfaces.Products;
 
 public interface IEditProductUseCase
 {

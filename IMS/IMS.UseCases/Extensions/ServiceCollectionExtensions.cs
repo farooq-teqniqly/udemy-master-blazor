@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using IMS.CoreBusiness;
-using IMS.UseCases.Interfaces;
+using IMS.UseCases.Interfaces.Inventories;
+using IMS.UseCases.Interfaces.Products;
 using IMS.UseCases.Inventories;
 using IMS.UseCases.Products;
 using IMS.UseCases.Validators;

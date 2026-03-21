@@ -1,4 +1,4 @@
-﻿using IMS.UseCases.Interfaces;
+﻿using IMS.UseCases.Interfaces.Products;
 using IMS.UseCases.PluginInterfaces;
 
 namespace IMS.UseCases.Inventories;

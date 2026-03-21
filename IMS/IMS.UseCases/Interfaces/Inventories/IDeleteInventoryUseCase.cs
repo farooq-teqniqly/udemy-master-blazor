@@ -1,4 +1,4 @@
-﻿namespace IMS.UseCases.Interfaces;
+﻿namespace IMS.UseCases.Interfaces.Inventories;
 
 public interface IDeleteInventoryUseCase
 {

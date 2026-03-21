@@ -1,8 +1,8 @@
 ﻿using IMS.CoreBusiness;
 
-namespace IMS.UseCases.Interfaces;
+namespace IMS.UseCases.Interfaces.Inventories;
 
-public interface IAddInventoryUseCase
+public interface IEditInventoryUseCase
 {
     Task ExecuteAsync(Inventory inventory, CancellationToken cancellationToken = default);
 }

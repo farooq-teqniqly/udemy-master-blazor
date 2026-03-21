@@ -1,5 +1,5 @@
 ﻿using IMS.CoreBusiness;
-using IMS.UseCases.Interfaces;
+using IMS.UseCases.Interfaces.Inventories;
 using IMS.UseCases.PluginInterfaces;
 
 namespace IMS.UseCases.Inventories
