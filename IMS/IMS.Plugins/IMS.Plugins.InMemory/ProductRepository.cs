@@ -23,6 +23,15 @@ namespace IMS.Plugins.InMemory
             },
         ];
 
+        public Task AddProductAsync(Product product, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(product);
+
+            return !_products.Add(product)
+                ? throw new InvalidOperationException($"Product with {product.Id} already exists.")
+                : Task.CompletedTask;
+        }
+
         public Task DeleteProductAsync(string id, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(id);

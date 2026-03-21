@@ -1,0 +1,50 @@
+﻿@page "/add-product"
+
+
+@inject IAddProductUseCase AddProductUseCase
+@inject NavigationManager NavigationManager
+
+<h3>AddProduct</h3>
+<br/>
+
+<EditForm Model="product" FormName="formProduct" OnValidSubmit="SaveAsync">
+    <FluentValidator></FluentValidator>
+
+    <div class="form-group">
+        <label for="name">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="product.Name"></InputText>
+        <ValidationMessage For="() => product.Name"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label for="quantity">Quantity</label>
+        <InputNumber id="quantity" class="form-control" @bind-Value="product.Quantity"></InputNumber>
+        <ValidationMessage For="() => product.Quantity"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label for="price">Price</label>
+        <InputNumber id="price" class="form-control" @bind-Value="product.Price"></InputNumber>
+        <ValidationMessage For="() => product.Price"></ValidationMessage>
+    </div>
+    <br/>
+    <button type="submit" class="btn btn-outline-primary">Save</button>
+    &nbsp;
+    <a href="/products" class="btn btn-outline-danger">Cancel</a>
+</EditForm>
+
+@code {
+    private Product _product = new();
+
+    [SupplyParameterFromForm]
+    private Product product
+    {
+        get => _product;
+        set => _product = value;
+    }
+
+    private async Task SaveAsync()
+    {
+        await AddProductUseCase.ExecuteAsync(_product);
+        NavigationManager.NavigateTo("/products");
+    }
+
+}
