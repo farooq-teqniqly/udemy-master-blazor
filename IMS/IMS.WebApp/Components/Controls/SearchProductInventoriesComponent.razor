@@ -16,7 +16,7 @@
         <ul>
             @foreach (var inventory in inventories)
             {
-                <li @key="inventory.Id">@inventory.Name</li>
+                <li @key="inventory.Id" @onclick="() => SelectInventory(inventory)">@inventory.Name</li>
             }
         </ul>
     </div>
@@ -35,11 +35,20 @@
         }
     }
 
+    [Parameter]
+    public EventCallback<Inventory> OnInventorySelected { get; set; }
+
     private List<Inventory>? inventories = [];
 
     private async Task Search()
     {
         inventories = (await ViewInventoriesByNameUseCase.ExecuteAsync(searchFilter)).ToList();
         StateHasChanged();
+    }
+
+    private async Task SelectInventory(Inventory inventory)
+    {
+        await OnInventorySelected.InvokeAsync(inventory);
+        inventories?.Clear();
     }
 }

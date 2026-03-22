@@ -1,4 +1,6 @@
-﻿namespace IMS.CoreBusiness
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace IMS.CoreBusiness
 {
     public sealed class Product : IEquatable<Product>
     {
@@ -7,6 +9,7 @@
         public string Name { get; set; } = null!;
         public double Price { get; set; }
 
+        public List<ProductInventory> ProductInventories { get; set; } = [];
         public int Quantity { get; set; }
 
         public static bool operator !=(Product? left, Product? right)
@@ -17,6 +20,32 @@
         public static bool operator ==(Product? left, Product? right)
         {
             return Equals(left, right);
+        }
+
+        public void AddInventory(Inventory inventory)
+        {
+            if (
+                ProductInventories.Any(pi =>
+                    pi.Inventory is not null
+                    && pi.Inventory.Name.Equals(inventory.Name, StringComparison.OrdinalIgnoreCase)
+                )
+            )
+            {
+                throw new InvalidOperationException(
+                    $"Inventory {inventory.Name} has already been added."
+                );
+            }
+
+            ProductInventories.Add(
+                new ProductInventory
+                {
+                    InventoryId = inventory.Id,
+                    InventoryQuantity = 1,
+                    Inventory = inventory,
+                    ProductId = Id,
+                    Product = this,
+                }
+            );
         }
 
         public bool Equals(Product? other)
@@ -42,6 +71,11 @@
         public override int GetHashCode()
         {
             return StringComparer.OrdinalIgnoreCase.GetHashCode(Id);
+        }
+
+        public void RemoveInventory(ProductInventory productInventory)
+        {
+            ProductInventories.Remove(productInventory);
         }
     }
 }

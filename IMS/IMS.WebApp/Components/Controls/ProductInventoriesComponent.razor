@@ -1,0 +1,45 @@
+﻿<SearchProductInventoriesComponent OnInventorySelected="InventorySelected"></SearchProductInventoriesComponent>
+
+@if (Product is not null && Product.ProductInventories.Count > 0)
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            @foreach (var pi in Product.ProductInventories)
+            {
+                <tr>
+                    <td>@pi.Inventory?.Name</td>
+                    <td>
+                        <input type="number" min="0" max="10" @bind-value="pi.InventoryQuantity" />
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-link" @onclick="() => RemoveInventory(pi)">Remove</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    public Product? Product { get; set; }
+
+    private void RemoveInventory(ProductInventory productInventory)
+    {
+        Product?.RemoveInventory(productInventory);
+    }
+
+
+    private void InventorySelected(Inventory inventory)
+    {
+        Product?.AddInventory(inventory);
+    }
+
+}
