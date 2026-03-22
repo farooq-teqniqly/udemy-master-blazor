@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace IMS.CoreBusiness
+﻿namespace IMS.CoreBusiness
 {
     public sealed class Product : IEquatable<Product>
     {
@@ -46,6 +44,12 @@ namespace IMS.CoreBusiness
                     Product = this,
                 }
             );
+        }
+
+        public bool IsValid()
+        {
+            return Price
+                >= ProductInventories.Sum(pi => pi.Inventory?.Price * pi.InventoryQuantity);
         }
 
         public bool Equals(Product? other)

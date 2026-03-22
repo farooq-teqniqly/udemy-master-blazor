@@ -43,6 +43,11 @@
 
     private async Task SaveAsync()
     {
+        if (!product.IsValid())
+        {
+            throw new InvalidOperationException("Product price can't be less than the total inventory price.");
+        }
+
         await AddProductUseCase.ExecuteAsync(product);
         NavigationManager.NavigateTo("/products");
     }
