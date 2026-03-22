@@ -4,6 +4,7 @@
     <input id="name"
            class="form-control"
            @bind-value="searchFilter"
+           @bind-value:event="oninput"
            placeholder="Search"/>
 
     <button type="button" class="btn btn-outline-primary" @onclick="Search">Search</button>
@@ -23,12 +24,22 @@
 }
 
 @code {
-    private string searchFilter = string.Empty;
+
+    private string? searchFilter
+    {
+        get;
+        set
+        {
+            field = value;
+            Search();
+        }
+    }
 
     private List<Inventory>? inventories = [];
 
     private async Task Search()
     {
         inventories = (await ViewInventoriesByNameUseCase.ExecuteAsync(searchFilter)).ToList();
+        StateHasChanged();
     }
 }
